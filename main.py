@@ -8,7 +8,7 @@ import sqlite3
 
 # 데이터베이스랑 연결
 con = sqlite3.connect("db.db",check_same_thread=False)
-cur = con.cursor();
+cur = con.cursor()
 
 # Chat 클래스 속성 타입 지정
 class Chat(BaseModel):
@@ -50,7 +50,7 @@ async def create_item(image:UploadFile,
 async def get_items():
     con.row_factory = sqlite3.Row # 컬럼명 가져옴
     cur = con.cursor() # 쿼리문 실행시키려면 커서 객체를 통해 연결해줘야 함
-    # 전체 데이터 불러옴 (컬럼명 같이 불러와야 구별가능)
+    # 전체 데이터 불러옴 (컬럼명 같이 불러와야 구별가능)  
     rows = cur.execute(f"""
                         SELECT * from items
                         """).fetchall()
@@ -68,6 +68,20 @@ async def get_image(item_id):
                               """).fetchone()[0] # 이미지 한개만 불러옴
     # image_bytes(16진법) ->  바이트로 변경
     return Response(content=bytes.fromhex(image_bytes))
+
+# 회원가입 
+@app.post("/signup")
+def signup(id:Annotated[str,Form()],
+           password:Annotated[str,Form()],
+           name:Annotated[str,Form()],
+           email:Annotated[str,Form()]):
+    cur.execute(f"""
+                INSERT INTO users(id,name,email,password)
+                VALUES('{id}','{name}','{email}','{password}')
+                """)
+    con.commit()
+    print(id,password)
+    return '200'
 
 
 app.mount("/", StaticFiles(directory="static" , html=True), name="static")
