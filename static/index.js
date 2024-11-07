@@ -61,9 +61,21 @@ const renderData = (data) => {
 
 // 서버에 저장된 데이터 불러오기 (read -> GET 요청)
 const fetchList =  async () => {
-    const res = await fetch("/items");
+    // localStorage 에 저장된 값을 가져와서 넣어줘야함
+    const accessToken = window.localStorage.getItem("token")    
+    const res = await fetch("/items",{
+        headers:{
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (res.status === 401) {
+        alert("로그인이 필요합니다.");
+        window.location.pathname = "/login.html";
+        return;
+    }
+
     const data = await res.json();
-    console.log(data);
     renderData(data);
 };
 
